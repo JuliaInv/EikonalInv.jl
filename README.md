@@ -4,7 +4,7 @@ For forward modelling and sensitivities it uses the fast marching algorithm for 
 
 Based on the following paper (please cite if you are using the package):
 
-Eran Treister and Eldad Haber, A fast marching algorithm for the factored eikonal equation, Under review.
+Eran Treister and Eldad Haber, A fast marching algorithm for the factored eikonal equation.
 
 # Requirements
 
