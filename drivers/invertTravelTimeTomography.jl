@@ -69,7 +69,7 @@ EikMPIWorkers = nworkers(); # this just set the maximal MPI workers. To activate
 
 misfun = SSDFun
 
-jInvVersion = 1
+jInvVersion = 2
 
 if jInvVersion==1
 
