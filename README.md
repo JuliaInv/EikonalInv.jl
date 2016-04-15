@@ -1,5 +1,5 @@
 # EikonalInv.jl
-A Julia package for solving the inverse eikonal equation of a regular rectangular mesh.
+A Julia package for solving the inverse eikonal equation on a regular rectangular mesh.
 For forward modelling and sensitivities it uses the fast marching algorithm for the factored eikonal equation.
 
 Based on the following paper (please cite if you are using the package):
