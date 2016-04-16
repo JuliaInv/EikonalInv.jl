@@ -1,3 +1,8 @@
+
+if nworkers()==1
+  addprocs(2);
+end
+
 using  jInv.Mesh
 using  jInv.Utils
 using  jInv.InverseSolve
