@@ -22,8 +22,9 @@ sea = abs(m[:] .- maximum(m)) .< 1e-2;
 mref[sea] = m[sea];
 if newSize!=[]
 	m    = expandModelNearest(m,   collect(size(m)),newSize);
-	mref = expandModelNearest(mref,collect(size(m)),newSize);
+	mref = expandModelNearest(mref,collect(size(mref)),newSize);
 end
+
 Minv = getRegularMesh(domain,collect(size(m))-1);
 
 

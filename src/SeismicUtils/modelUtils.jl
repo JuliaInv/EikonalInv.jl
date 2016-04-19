@@ -5,8 +5,8 @@ if length(size(m))==2
 	mnew = zeros(Float64,ntarget[1],ntarget[2]);
 	for j=1:ntarget[2]
 		for i=1:ntarget[1]
-			jorig = convert(Int64,ceil(j/ntarget[2]*n[2]));
-			iorig = convert(Int64,ceil(i/ntarget[1]*n[1]));
+			jorig = convert(Int64,ceil((j/ntarget[2])*n[2]));
+			iorig = convert(Int64,ceil((i/ntarget[1])*n[1]));
 			mnew[i,j] = m[iorig,jorig];
 		end
 	end
@@ -15,9 +15,9 @@ elseif length(size(m))==3
 	for k=1:ntarget[3]
 		for j=1:ntarget[2]
 			for i=1:ntarget[1]
-				korig = convert(Int64,ceil(k/ntarget[3]*n[3]));
-				jorig = convert(Int64,ceil(j/ntarget[2]*n[2]));
-				iorig = convert(Int64,ceil(i/ntarget[1]*n[1]));
+				korig = convert(Int64,ceil((k/ntarget[3])*n[3]));
+				jorig = convert(Int64,ceil((j/ntarget[2])*n[2]));
+				iorig = convert(Int64,ceil((i/ntarget[1])*n[1]));
 				mnew[i,j,k] = m[iorig,jorig,korig];
 			end
 		end
@@ -32,7 +32,7 @@ if length(size(m))==2
 	m_vel = 1./sqrt(m);
 	mtop = m_vel[:,5:20];
 	mtop = mean(mtop[:]);
-	mbottom = m_vel[:,end-30:end-10];
+	mbottom = m_vel[:,end-30:end];
 	mbottom = mean(mbottom[:]);
 	m_vel = ones(nx)*linspace(mtop,mbottom,nz)';
 	mref = 1./(m_vel.^2);
@@ -83,7 +83,7 @@ elseif length(size(m))==3
 	m_vel = 1./sqrt(m);
 	mtop = m_vel[:,:,5:15];
 	mtop = mean(mtop[:]);
-	mbottom = m_vel[:,:,end-30:end-10];
+	mbottom = m_vel[:,:,end-30:end];
 	mbottom = mean(mbottom[:]);
 	lin = linspace(mtop,mbottom,nz);
 	m_vel = copy(m);

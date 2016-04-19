@@ -84,12 +84,13 @@ function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers
 	end
 	return pFor,continuationDivision,SourcesSubInd# Array of Remote Refs
 end
+
 import jInv.Utils.clear!
 function clear!(pFor::EikonalInvParam)
 for k = 1:length(pFor.eikonalParams)
 	clear!(pFor.eikonalParams[k]);
 end
-return;
+return pFor;
 end
 
 include("./SeismicUtils/SeismicUtils.jl")
