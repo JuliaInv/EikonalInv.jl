@@ -46,7 +46,7 @@ prepareTravelTimeDataFiles(m,Minv,mref,boundsHigh,boundsLow,dataFilenamePrefix,p
 resultsFilenamePrefix = "";
 # this filename can be used to save the model during the iterations
 # resultsFilenamePrefix = string(resultsDir,"/travelTimeInvSEG"); 
-(mc,Dpred) = invertTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix,NumIter);
+(mc,Dpred) = invertTravelTimeTomographyBoundModel(m,dataFilenamePrefix, resultsFilenamePrefix,NumIter);
 
 if plotting
 	figure()

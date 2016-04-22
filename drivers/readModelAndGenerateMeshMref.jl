@@ -34,8 +34,8 @@ Minv = getRegularMesh(domain,collect(size(m))-1);
 
 
 N = prod(MinvPadded.n+1);
-boundsLow  = 0.99*minimum(mPadded);
-boundsHigh = 1.01*maximum(mPadded);
+boundsLow  = minimum(mPadded);
+boundsHigh = maximum(mPadded);
 
 boundsLow  = ones(N)*boundsLow;
 boundsLow = convert(Array{Float32},boundsLow);

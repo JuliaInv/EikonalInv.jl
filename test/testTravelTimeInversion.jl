@@ -29,7 +29,7 @@ dataFilenamePrefix = string(dataDir,"/DATA_SEG",tuple((Minv.n+1)...));
 
 prepareTravelTimeDataFiles(m,Minv,mref,boundsHigh,boundsLow,dataFilenamePrefix,pad,jump,offset);
 resultsFilenamePrefix = "";
-(mc,Dpred) = invertTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix,NumIter);
+(mc,Dpred) = invertTravelTimeTomographyBoundModel(m,dataFilenamePrefix, resultsFilenamePrefix,NumIter);
 #############################################################################################
 rm("DATA_SEG(256,128)_travelTime.dat");
 rm("DATA_SEG(256,128)_rcvMap.dat");
