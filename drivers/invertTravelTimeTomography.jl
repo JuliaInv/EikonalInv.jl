@@ -88,14 +88,8 @@ maxStep=0.2*maximum(boundsHigh);
 
 a = minimum(boundsLow)*0.8;
 b = maximum(boundsHigh)*1.2;
-modfun(x) = getBoundModel(x,a,b);
-mref = getBoundModelInv(mref,a,b);
-boundsHigh = boundsHigh*10000000.0;
-boundsLow = -boundsLow*100000000.0
 
-# function modfun(x)
-	# return x, eye(length(x));
-# end
+modfun = identityMod;
 
 
 cgit = 10; 
@@ -121,13 +115,14 @@ function dump(mc,Dc,iter,pInv,pMis)
 		if plotting
 			close(888);
 			figure(888);
-			plotModel(fullMc,true,false,[],0,[a/0.8,b/1.2],splitdir(Temp)[2]);
+			plotModel(fullMc,true,false,[],0,[a,b],splitdir(Temp)[2]);
 		end
 	end
 end						 
 						 
 tic()
 mc,Dc,flag = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
+# mc,Dc,flag = ADMMconst(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
 toc()
 
 Dpred = Array(Array{Float64,2},length(pMisRFs))

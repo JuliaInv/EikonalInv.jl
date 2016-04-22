@@ -1,4 +1,4 @@
-function invertTravelTimeTomography(m,filenamePrefix::ASCIIString, resultsOutputFolderAndPrefix::ASCIIString,maxit = 10)
+function invertTravelTimeTomographyBoundModel(m,filenamePrefix::ASCIIString, resultsOutputFolderAndPrefix::ASCIIString,maxit = 10)
 
 file = matopen(string(filenamePrefix,"_PARAM.mat"));
 n_cells = read(file,"MinvN");
