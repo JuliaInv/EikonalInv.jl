@@ -37,13 +37,7 @@ P = generateSrcRcvProjOperators(Minv.n+1,rcvNodeMap);
 println("~~~~~~~ Getting data Eikonal: ~~~~~~~");
 (pForEIK,contDivEIK,SourcesSubIndEIK) = getEikonalInvParam(Minv,Q,P,HO,nworkers());
 
-Mesh2Mesh = Array(RemoteRef{Channel{Any}},length(pForEIK))	
-for i=1:length(Mesh2Mesh)
-	k = pForEIK[i].where
-	Mesh2Mesh[i] = remotecall(k,speye,prod(Minv.n+1))
-end
-
-(D,pForEIK) = getData(m[:],pForEIK,Mesh2Mesh,true);
+(D,pForEIK) = getData(m[:],pForEIK,ones(length(pForEIK)),true);
 
 
 Dobs = Array(Array{Float64,2},length(pForEIK))
