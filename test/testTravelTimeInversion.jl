@@ -66,10 +66,10 @@ pInv = getInverseParam(Minv,modfun,regfun,alpha,mref[:],boundsLow,boundsHigh,
 mc,Dc,flag = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = []);
 
 #############################################################################################
-rm("DATA_SEG(256,128)_travelTime.dat");
-rm("DATA_SEG(256,128)_rcvMap.dat");
-rm("DATA_SEG(256,128)_srcMap.dat");
-rm("DATA_SEG(256,128)_PARAM.mat");
-rm("jInv.out");
+# rm("DATA_SEG(256,128)_travelTime.dat");
+# rm("DATA_SEG(256,128)_rcvMap.dat");
+# rm("DATA_SEG(256,128)_srcMap.dat");
+# rm("DATA_SEG(256,128)_PARAM.mat");
+# rm("jInv.out");
 
 
