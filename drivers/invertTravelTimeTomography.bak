@@ -1,4 +1,4 @@
-function invertTravelTimeTomographyBoundModel(m,filenamePrefix::ASCIIString, resultsOutputFolderAndPrefix::ASCIIString,maxit = 10)
+function invertTravelTimeTomography(m,filenamePrefix::ASCIIString, resultsOutputFolderAndPrefix::ASCIIString,maxit = 10)
 
 file = matopen(string(filenamePrefix,"_PARAM.mat"));
 n_cells = read(file,"MinvN");
@@ -88,12 +88,8 @@ maxStep=0.2*maximum(boundsHigh);
 
 a = minimum(boundsLow)*0.8;
 b = maximum(boundsHigh)*1.2;
-modfun(x) = getBoundModel(x,a,b);
-mref = getBoundModelInv(mref,a,b);
-boundsHigh = boundsHigh*10000000.0;
-boundsLow = -boundsLow*100000000.0
 
-# modfun = identityMod;
+modfun = identityMod;
 
 
 cgit = 10; 
@@ -106,6 +102,7 @@ HesPrec=getSSORCGRegularizationPreconditioner(1.0,1e-5,1000)
 
 regparams = [1.0,1.0,1.0,1e-2];
 regfun(m, mref, M) = wdiffusionRegNodal(m, mref, M, Iact=Iact, C = regparams);
+# regfun(m, mref, M) = wTVRegNodal(m, mref, M, Iact=Iact, C = regparams);
 	
 pInv = getInverseParam(Minv,modfun,regfun,alpha,mref[:],boundsLow,boundsHigh,
                      maxStep=maxStep,pcgMaxIter=cgit,pcgTol=pcgTol,
@@ -125,7 +122,8 @@ function dump(mc,Dc,iter,pInv,pMis)
 end						 
 						 
 tic()
-mc,Dc,flag = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
+# mc,Dc,flag = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
+mc,Dc,flag = ADMMconst(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
 toc()
 
 Dpred = Array(Array{Float64,2},length(pMisRFs))

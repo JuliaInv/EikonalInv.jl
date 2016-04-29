@@ -49,7 +49,7 @@ Dobs = arrangeRemoteCallDataIntoLocalData(Dobs);
 # D should be of length 1 becasue constMUSTBeOne = 1;
 # Dobs = fetch(D[1]);
 Dobs += 0.01*mean(abs(Dobs))*randn(size(Dobs,1),size(Dobs,2));
-Wd = (50.0./(abs(Dobs)+ 0.1*mean(abs(Dobs))));
+Wd = (1.0./(abs(Dobs)+ 0.1*mean(abs(Dobs))));
 Wd = limitDataToOffset(Wd,srcNodeMap,rcvNodeMap,offset);
 writeDataFile(string(dataFullFilename,".dat"),Dobs,Wd,srcNodeMap,rcvNodeMap);
 

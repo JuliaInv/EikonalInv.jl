@@ -7,7 +7,9 @@ if dim==2
 	m = m*1e-3;
 	m = m';
 	m = (1./m).^2;
-	mref = getSimilarLinearModel(m);
+	mref = copy(m);
+	mref[:,1:end-17] = getSimilarLinearModel(m[:,1:end-17]);
+	# mref = getSimilarLinearModel(m);
 else
 	# 3D SEG slowness model
 	# modelFilename = 3Dseg256256128.mat

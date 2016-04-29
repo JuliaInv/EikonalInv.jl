@@ -14,6 +14,7 @@ end
 if plotting
 	if length(size(m))==2
 		T = (1./sqrt(m))';
+		
 		imshow(T, clim = tuple(1./sqrt([vmax,vmin])...)); colorbar();
 		if includeMeshInfo
 			Omega = Msh.domain;

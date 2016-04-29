@@ -30,9 +30,9 @@ function getSimilarLinearModel(m::Array{Float64})
 if length(size(m))==2
 	(nx,nz) = size(m);
 	m_vel = 1./sqrt(m);
-	mtop = m_vel[:,5:20];
+	mtop = m_vel[1:10,5:6];
 	mtop = mean(mtop[:]);
-	mbottom = m_vel[:,end-30:end];
+	mbottom = m_vel[1:10,end-10:end];
 	mbottom = mean(mbottom[:]);
 	m_vel = ones(nx)*linspace(mtop,mbottom,nz)';
 	mref = 1./(m_vel.^2);
