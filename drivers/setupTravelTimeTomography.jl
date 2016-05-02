@@ -47,10 +47,13 @@ mback   = zeros(Float64,N);
 
 ## Setting the sea constant:
 mask = zeros(N);
-sea = abs(m[:] .- maximum(m)) .< 1e-2;
-mask[sea] = 1;
+sea = abs(m[:] .- minimum(m)) .< 1e-2;
+mask[sea] = 1.0;
 # # setup active cells
 mback = vec(m[:].*mask);
+sback = velocityToSlowSquared(mback)[1];
+sback[mask .== 0.0] = 0.0;
+
 Iact = Iact[:,mask .== 0.0];
 boundsLow = Iact'*boundsLow;
 boundsHigh = Iact'*boundsHigh;
@@ -78,9 +81,9 @@ end
 WdEik = 0;
 DobsEik = 0;
 
-pMisRFs = getMisfitParam(pFor, Wd, dobs, misfun, Iact,mback);
+pMisRFs = getMisfitParam(pFor, Wd, dobs, misfun, Iact,sback);
 
-return (Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,mback,mref,boundsHigh,boundsLow,resultsFilename);
+return (Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,sback,mref,boundsHigh,boundsLow,resultsFilename);
 end
 
 

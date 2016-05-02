@@ -1,5 +1,5 @@
 if nworkers()<=1
-	addprocs(2);
+	println("Make code faster by adding processes: addprocs(X)")
 end
 
 using  jInv.Mesh
@@ -36,7 +36,7 @@ include("../drivers/setupTravelTimeTomography.jl");
 #######################################################################################################
 dim     = 2;
 pad     = 0;
-jump    = 10;
+jump    = 5;
 offset  = 256;
 (m,Minv,mref,boundsHigh,boundsLow) = readModelAndGenerateMeshMref(modelDir,"SEGmodel2Dsalt.dat",dim,pad,[256,128],[0.0,13.5,0.0,4.2]);
 dataFilenamePrefix = string(dataDir,"/DATA_SEG",tuple((Minv.n+1)...));
@@ -52,46 +52,65 @@ end
 
 prepareTravelTimeDataFiles(m,Minv,mref,boundsHigh,boundsLow,dataFilenamePrefix,pad,jump,offset);
 
-
-(Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,mback,mref,boundsHigh,boundsLow,resultsFilename) = setupTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix);
-
+(Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,sback,mref,boundsHigh,boundsLow,resultsFilename) = setupTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix);
 
 ########################################################################################################
 ##### Set up Inversion #################################################################################
 ########################################################################################################
 
-maxStep=0.2*maximum(boundsHigh);
+maxStep=0.1*maximum(boundsHigh);
+modfun = velocityToSlowSquared;
+a = minimum(boundsLow);
+b = maximum(boundsHigh);
 
-a = minimum(boundsLow)*0.8;
-b = maximum(boundsHigh)*1.2;
-modfun(x) = getBoundModel(x,a,b);
-mref = getBoundModelInv(mref,a,b);
-boundsHigh = boundsHigh*10000000.0;
-boundsLow = -boundsLow*100000000.0
+################################################################################################################
+############### USE A BOUND MODEL ##############################################################################
+################################################################################################################
+# maxStep=0.1*maximum(boundsHigh);
+# a = minimum(boundsLow);
+# b = maximum(boundsHigh);
+# function modfun(m)
+	# bm,dbm = getBoundModel(m,a,b);
+	# bs,dbs = velocityToSlowSquared(bm);
+	# dsdm = dbm*dbs;
+	# return bs,dsdm;
+# end
+# mref = getBoundModelInv(mref,a,b);
+# boundsHigh = boundsHigh*10000000.0;
+# boundsLow = -boundsLow*100000000.0
 
-cgit  = 10;
+
+################################################################################################################
+################################################################################################################
+################################################################################################################
+
+
+cgit  = 8;
 maxit = 7;
-alpha = 1e+0;
+alpha = 1e-1;
 pcgTol = 1e-1;
 
 HesPrec=getSSORCGRegularizationPreconditioner(1.0,1e-5,1000)
 
 ################################################# GIT VERSION OF JINV #################################################
 
-regparams = [1.0,1.0,1.0,1e-2];
-regfun(m, mref, M) = wdiffusionRegNodal(m, mref, M, Iact=Iact, C = regparams);
+regparams = [1.0,1.0,1.0,1e-6];
+#### Use smoothness regularization 
+# regfun(m, mref, M) = wdiffusionRegNodal(m, mref, M, Iact=Iact, C = regparams);
+#### Use TV regularization 
+regfun(m, mref, M) = wTVRegNodal(m, mref, M, Iact=Iact, C = regparams);
 	
 	
 function dump(mc,Dc,iter,pInv,pMis)
 	if resultsFilename!=""
-		fullMc = reshape(Iact*modfun(mc)[1] + mback,tuple((pInv.MInv.n+1)...));
+		ntup = tuple((pInv.MInv.n+1)...);
+		fullMc = slowSquaredToVelocity(reshape(Iact*pInv.modelfun(mc)[1] + sback,ntup))[1];
 		Temp = splitext(resultsFilename);
 		Temp = string(Temp[1],"_GN",iter,Temp[2]);
 		writedlm(Temp,convert(Array{Float16},fullMc));
 		if plotting
 			close(888);
 			figure(888);
-			println(splitdir(Temp)[2])
 			plotModel(fullMc,true,false,[],0,[a,b],splitdir(Temp)[2]);
 		end
 	end
@@ -100,8 +119,10 @@ end
 pInv = getInverseParam(Minv,modfun,regfun,alpha,mref[:],boundsLow,boundsHigh,
                      maxStep=maxStep,pcgMaxIter=cgit,pcgTol=pcgTol,
 					 minUpdate=1e-3, maxIter = maxit,HesPrec=HesPrec);
-					 
+#### Projected Gauss Newton
 mc,Dc,flag = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
+#### Barrier Gauss Newton
+# mc,Dc,flag = barrierGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump,epsilon = 0.1);
 
 Dpred = Array(Array{Float64,2},length(pMisRFs))
 for k = 1:length(pMisRFs)
@@ -112,13 +133,8 @@ Dpred = arrangeRemoteCallDataIntoLocalData(Dpred);
 if resultsFilename!=""
 	Temp = splitext(resultsFilename);
 	writedlm(string(Temp[1],"_predictedData",Temp[2]),convert(Array{Float16},Dpred));
-	writedlm(string(Temp[1],"_recoveredModel",Temp[2]),convert(Array{Float16},reshape(Iact*modfun(mc)[1] + mback,tuple((pInv.MInv.n+1)...))));
+	writedlm(string(Temp[1],"_recoveredModel",Temp[2]),convert(Array{Float16},reshape(Iact*modfun(mc)[1] + sback,tuple((pInv.MInv.n+1)...))));
 end
 
-rm("DATA_SEG(256,128)_travelTime.dat");
-rm("DATA_SEG(256,128)_rcvMap.dat");
-rm("DATA_SEG(256,128)_srcMap.dat");
-rm("DATA_SEG(256,128)_PARAM.mat");
-rm("jInv.out");
 #############################################################################################
 

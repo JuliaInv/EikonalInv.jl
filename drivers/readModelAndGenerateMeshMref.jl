@@ -1,12 +1,11 @@
 function readModelAndGenerateMeshMref(readModelFolder::ASCIIString,modelFilename::ASCIIString,dim::Int64,pad::Int64,newSize::Vector,domain::Vector)
-
+########################## m,mref are in Velocity here. ###################################
 
 if dim==2
 	# SEGmodel2Deasy.dat
 	m = readdlm(string(readModelFolder,"/",modelFilename));
 	m = m*1e-3;
 	m = m';
-	m = (1./m).^2;
 	mref = copy(m);
 	mref[:,1:end-17] = getSimilarLinearModel(m[:,1:end-17]);
 	# mref = getSimilarLinearModel(m);
@@ -16,11 +15,10 @@ else
 	file = matopen(string(readModelFolder,"/",modelFilename)); DICT = read(file); close(file);
 	m = DICT["VELs"];
 	m = m*1e-3;
-	m = (1./m).^2;	
 	mref = getSimilarLinearModel(m);
 end
 
-sea = abs(m[:] .- maximum(m)) .< 1e-2;
+sea = abs(m[:] .- minimum(m)) .< 1e-2;
 mref[sea] = m[sea];
 if newSize!=[]
 	m    = expandModelNearest(m,   collect(size(m)),newSize);

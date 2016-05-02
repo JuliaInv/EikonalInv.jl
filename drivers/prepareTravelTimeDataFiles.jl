@@ -1,5 +1,7 @@
 function prepareTravelTimeDataFiles(m,Minv::RegularMesh,mref,boundsHigh,boundsLow,filenamePrefix::ASCIIString,pad::Int64,jump::Int64,offset::Int64)
 ### Here we generate data files for sources and receivers. This can be replaced with real sources/receivers files.
+########################## m is in Velocity here. ###################################
+
 RCVfile = string(filenamePrefix,"_rcvMap.dat");
 SRCfile = string(filenamePrefix,"_srcMap.dat");
 writeSrcRcvLocFile(SRCfile,Minv,pad,jump);
@@ -23,6 +25,8 @@ end
 
 function prepareTravelTimeDataFiles(m, Minv::RegularMesh, filenamePrefix::ASCIIString,dataFullFilename::ASCIIString, offset::Int64,HO::Bool)
 
+########################## m is in Velocity here. ###################################
+
 RCVfile = string(filenamePrefix,"_rcvMap.dat");
 SRCfile = string(filenamePrefix,"_srcMap.dat");
 srcNodeMap = readSrcRcvLocationFile(SRCfile,Minv);
@@ -37,7 +41,7 @@ P = generateSrcRcvProjOperators(Minv.n+1,rcvNodeMap);
 println("~~~~~~~ Getting data Eikonal: ~~~~~~~");
 (pForEIK,contDivEIK,SourcesSubIndEIK) = getEikonalInvParam(Minv,Q,P,HO,nworkers());
 
-(D,pForEIK) = getData(m[:],pForEIK,ones(length(pForEIK)),true);
+(D,pForEIK) = getData(velocityToSlowSquared(m[:])[1],pForEIK,ones(length(pForEIK)),true);
 
 
 Dobs = Array(Array{Float64,2},length(pForEIK))
@@ -47,7 +51,6 @@ end
 Dobs = arrangeRemoteCallDataIntoLocalData(Dobs);
 
 # D should be of length 1 becasue constMUSTBeOne = 1;
-# Dobs = fetch(D[1]);
 Dobs += 0.01*mean(abs(Dobs))*randn(size(Dobs,1),size(Dobs,2));
 Wd = (1.0./(abs(Dobs)+ 0.1*mean(abs(Dobs))));
 Wd = limitDataToOffset(Wd,srcNodeMap,rcvNodeMap,offset);

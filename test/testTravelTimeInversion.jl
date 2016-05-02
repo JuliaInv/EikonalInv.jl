@@ -14,7 +14,6 @@ modelDir = "../examples";
 
 dataDir = pwd();
 include("../drivers/prepareTravelTimeDataFiles.jl");
-include("../drivers/plotModel.jl");
 include("../drivers/readModelAndGenerateMeshMref.jl");
 include("../drivers/setupTravelTimeTomography.jl");
 
@@ -31,18 +30,21 @@ dataFilenamePrefix = string(dataDir,"/DATA_SEG",tuple((Minv.n+1)...));
 
 prepareTravelTimeDataFiles(m,Minv,mref,boundsHigh,boundsLow,dataFilenamePrefix,pad,jump,offset);
 resultsFilenamePrefix = "";
-(Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,mback,mref,boundsHigh,boundsLow,resultsFilename) = setupTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix);
+(Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,sback,mref,boundsHigh,boundsLow,resultsFilename) = setupTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix);
 
 
 ########################################################################################################
 ##### Set up Inversion #################################################################################
 ########################################################################################################
-
-maxStep=0.2*maximum(boundsHigh);
-
-a = minimum(boundsLow)*0.8;
-b = maximum(boundsHigh)*1.2;
-modfun(x) = getBoundModel(x,a,b);
+maxStep=0.1*maximum(boundsHigh);
+a = minimum(boundsLow);
+b = maximum(boundsHigh);
+function modfun(m)
+	bm,dbm = getBoundModel(m,a,b);
+	bs,dbs = velocityToSlowSquared(bm);
+	dsdm = dbm*dbs;
+	return bs,dsdm;
+end
 mref = getBoundModelInv(mref,a,b);
 boundsHigh = boundsHigh*10000000.0;
 boundsLow = -boundsLow*100000000.0

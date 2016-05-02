@@ -8,14 +8,14 @@ else
 	vmax = maximum(m);
 end
 
+limits = tuple([vmax,vmin]...);
 if cutPad >= 0
 	m,Msh = cutAbsorbingLayer(m,Msh,cutPad);
 end
 if plotting
 	if length(size(m))==2
-		T = (1./sqrt(m))';
-		
-		imshow(T, clim = tuple(1./sqrt([vmax,vmin])...)); colorbar();
+		T = m';
+		imshow(T, clim = limits); colorbar();
 		if includeMeshInfo
 			Omega = Msh.domain;
 			tics = 0:2:floor(Int64,Omega[2])
@@ -33,13 +33,14 @@ if plotting
 		end
 	elseif length(size(m))==3
 		lin = zeros(Int64,16);
+		v = m;
 		for k=1:16
 			lin[k] = convert(Int64,round(k*(size(m,2)/16)));
 		end
 		for k=1:16
 			subplot(4,4,k)
-			pic = reshape(m[:,lin[k],:],size(m,1),size(m,3))';
-			imshow(pic,clim = (vmin,vmax)); title(string("frame",lin[k]));colorbar()
+			pic = reshape(v[:,lin[k],:],size(m,1),size(m,3))';
+			imshow(pic,clim = limits); title(string("frame",lin[k]));colorbar()
 		end
 		if filename != ""
 			title(filename[1:end-4],fontsize = 11);

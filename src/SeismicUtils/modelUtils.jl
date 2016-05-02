@@ -1,4 +1,18 @@
-export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer,cutAbsorbingLayer
+export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer,cutAbsorbingLayer,velocityToSlowSquared,slowSquaredToVelocity
+
+
+function velocityToSlowSquared(v::Array)
+s = (1./(v+1e-16)).^2
+ds = spdiagm((-2.0)./(v[:].^3));
+return s,ds
+end
+
+function slowSquaredToVelocity(s::Array)
+m = 1./sqrt(s+1e-16);
+dm = spdiagm(-0.5*(1./(s[:].^(3/2))));
+return m,dm
+end
+
 
 function expandModelNearest(m,n,ntarget)
 if length(size(m))==2
@@ -27,60 +41,22 @@ return mnew
 end
 
 function getSimilarLinearModel(m::Array{Float64})
+# m here is assumed to be a velocity model.
 if length(size(m))==2
 	(nx,nz) = size(m);
-	m_vel = 1./sqrt(m);
+	m_vel = copy(m) ; 
 	mtop = m_vel[1:10,5:6];
 	mtop = mean(mtop[:]);
 	mbottom = m_vel[1:10,end-10:end];
 	mbottom = mean(mbottom[:]);
 	m_vel = ones(nx)*linspace(mtop,mbottom,nz)';
-	mref = 1./(m_vel.^2);
+	mref = m_vel;
 	
-	
-	# println("~~~~~~~~~~ getSimilarLinearModel ~~~~~~~~~~~~~~~~~~~~~~~~")
-	# println(mtop);println(mbottom);
-	# X,Y = ndgrid(0:size(m,1)-1,0:size(m,2)-1);
-	# y1 = 1./sqrt(m[1,1]);
-	# y2 = 1./sqrt(m[1,end]);
-	# a = (y2-y1)/size(m,2);
-	# vel0 = y1+a*Y;
-	# mref = ((1./vel0).^2);
-	
-	
-	
-	
-	# vel_left = reshape(1./sqrt(m[1,:]),size(m,2));
-	# vel_right = reshape(1./sqrt(m[end,:]),size(m,2));
-	# z = 0:size(m,2)-1;
-	# a = (vel_left[1] + vel_right[1]) / 2.0;
-	# w = 1-(z ./ maximum(z));
-	# w = (z/maximum(z));
-	# b = (dot(vel_left - a,w.*z) + dot(vel_right - a,w.*z) )/ (2*dot(z,w.*z))
-	# profile = 1./((b*z + a).^2);
-	# mref = ones(size(m,1))*profile'
-	
-	
-	# vel_left = reshape(1./sqrt(m[1,:]),size(m,2));
-	# vel_right = reshape(1./sqrt(m[end,:]),size(m,2));
-	# z = 0:size(m,2)-1;
-	# vel_top = (vel_left[1] + vel_right[1]) / 2.0;
-	# vel_bot = 1./sqrt(m[div(size(m,1),2),end]);
-	# b = (vel_bot - vel_top) / size(m,2)
-	# profile = 1./((b*z + vel_top).^2);
-	# mref = ones(size(m,1))*profile'
-	
-	
-	
-	
-	# println("~~~~~~~~~~ getSimilarLinearModel Old ~~~~~~~~~~~~~~~~~~~~~~")
-	# println(y1);println(y2);
-	
-   
+
 
 elseif length(size(m))==3
 	(nx,ny,nz) = size(m);
-	m_vel = 1./sqrt(m);
+	m_vel = copy(m);
 	mtop = m_vel[1:10,:,5:15];
 	mtop = mean(mtop[:]);
 	mbottom = m_vel[1:10,:,end-10:end];
@@ -91,7 +67,7 @@ elseif length(size(m))==3
 	for k=1:nz
 		m_vel[:,:,k] = lin[k]*Oplane;
 	end
-	mref = 1./(m_vel.^2);
+	mref = m_vel;
 else
 	error("Unhandled Dimensions");
 end
