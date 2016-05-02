@@ -22,10 +22,10 @@ include("../drivers/setupTravelTimeTomography.jl");
 ######################################## for SEG 256X512 ###############################################
 #######################################################################################################
 dim     = 2;
-pad     = 0;
-jump    = 40;
+pad     = 1;
+jump    = 32;
 offset  = 256;
-(m,Minv,mref,boundsHigh,boundsLow) = readModelAndGenerateMeshMref(modelDir,"SEGmodel2Dsalt.dat",dim,pad,[256,128],[0.0,13.5,0.0,4.2]);
+(m,Minv,mref,boundsHigh,boundsLow) = readModelAndGenerateMeshMref(modelDir,"SEGmodel2Dsalt.dat",dim,pad,[64,32],[0.0,13.5,0.0,4.2]);
 dataFilenamePrefix = string(dataDir,"/DATA_SEG",tuple((Minv.n+1)...));
 
 
@@ -52,7 +52,7 @@ maxit = 1;
 alpha = 1e+0;
 pcgTol = 1e-1;
 
-HesPrec=getSSORCGRegularizationPreconditioner(1.0,1e-5,1000)
+HesPrec=getSSORCGRegularizationPreconditioner(1.0,1e-5,2)
 
 ################################################# GIT VERSION OF JINV #################################################
 
@@ -63,13 +63,13 @@ pInv = getInverseParam(Minv,modfun,regfun,alpha,mref[:],boundsLow,boundsHigh,
                      maxStep=maxStep,pcgMaxIter=cgit,pcgTol=pcgTol,
 					 minUpdate=1e-3, maxIter = maxit,HesPrec=HesPrec);
 					 
-mc,Dc,flag = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = []);
+mc,Dc,flag = projGNCG(mref[:],pInv,pMisRFs,indCredit = []);
 
 #############################################################################################
-# rm("DATA_SEG(256,128)_travelTime.dat");
-# rm("DATA_SEG(256,128)_rcvMap.dat");
-# rm("DATA_SEG(256,128)_srcMap.dat");
-# rm("DATA_SEG(256,128)_PARAM.mat");
-# rm("jInv.out");
+rm("DATA_SEG(66,33)_travelTime.dat");
+rm("DATA_SEG(66,33)_rcvMap.dat");
+rm("DATA_SEG(66,33)_srcMap.dat");
+rm("DATA_SEG(66,33)_PARAM.mat");
+rm("jInv.out");
 
 

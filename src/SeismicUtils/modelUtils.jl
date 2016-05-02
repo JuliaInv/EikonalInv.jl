@@ -81,9 +81,9 @@ if length(size(m))==2
 elseif length(size(m))==3
 	(nx,ny,nz) = size(m);
 	m_vel = 1./sqrt(m);
-	mtop = m_vel[:,:,5:15];
+	mtop = m_vel[1:10,:,5:15];
 	mtop = mean(mtop[:]);
-	mbottom = m_vel[:,:,end-30:end];
+	mbottom = m_vel[1:10,:,end-10:end];
 	mbottom = mean(mbottom[:]);
 	lin = linspace(mtop,mbottom,nz);
 	m_vel = copy(m);
