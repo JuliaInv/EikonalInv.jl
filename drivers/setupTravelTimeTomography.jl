@@ -47,7 +47,7 @@ mback   = zeros(Float64,N);
 
 ## Setting the sea constant:
 mask = zeros(N);
-sea = abs(m[:] .- minimum(m)) .< 1e-2;
+sea = abs(m[:] .- minimum(m)) .< 5e-2;
 mask[sea] = 1.0;
 # # setup active cells
 mback = vec(m[:].*mask);

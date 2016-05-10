@@ -1,4 +1,4 @@
-export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer,cutAbsorbingLayer,velocityToSlowSquared,slowSquaredToVelocity
+export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer,cutAbsorbingLayer,velocityToSlowSquared,slowSquaredToVelocity,velocityToSlow,slowToSlowSquared
 
 
 function velocityToSlowSquared(v::Array)
@@ -13,6 +13,18 @@ dm = spdiagm(-0.5*(1./(s[:].^(3/2))));
 return m,dm
 end
 
+function velocityToSlow(v::Array)
+s = (1./(v+1e-16))
+ds = spdiagm((-1.0)./(v[:].^2));
+return s,ds
+end
+
+
+function slowToSlowSquared(v::Array)
+s = v.^2;
+ds = spdiagm(2.0*v[:]);
+return s,ds
+end
 
 function expandModelNearest(m,n,ntarget)
 if length(size(m))==2
@@ -40,15 +52,21 @@ end
 return mnew
 end
 
-function getSimilarLinearModel(m::Array{Float64})
+function getSimilarLinearModel(m::Array{Float64},mtop::Float64=0.0,mbottom::Float64=0.0)
 # m here is assumed to be a velocity model.
 if length(size(m))==2
 	(nx,nz) = size(m);
 	m_vel = copy(m) ; 
-	mtop = m_vel[1:10,5:6];
-	mtop = mean(mtop[:]);
-	mbottom = m_vel[1:10,end-10:end];
-	mbottom = mean(mbottom[:]);
+	if mtop==0.0
+		mtop = m_vel[1:10,5:6];
+		mtop = mean(mtop[:]);
+		println("Mref top = ",mtop);
+	end
+	if mbottom==0.0
+		mbottom = m_vel[1:10,end-10:end];
+		mbottom = mean(mbottom[:]);
+		println("Mref bottom = ",mbottom);
+	end
 	m_vel = ones(nx)*linspace(mtop,mbottom,nz)';
 	mref = m_vel;
 	
@@ -57,10 +75,14 @@ if length(size(m))==2
 elseif length(size(m))==3
 	(nx,ny,nz) = size(m);
 	m_vel = copy(m);
-	mtop = m_vel[1:10,:,5:15];
-	mtop = mean(mtop[:]);
-	mbottom = m_vel[1:10,:,end-10:end];
-	mbottom = mean(mbottom[:]);
+	if mtop==0.0
+		mtop = m_vel[1:10,:,5:15];
+		mtop = mean(mtop[:]);
+	end
+	if mbottom==0.0
+		mbottom = m_vel[1:10,:,end-10:end];
+		mbottom = mean(mbottom[:]);	
+	end
 	lin = linspace(mtop,mbottom,nz);
 	m_vel = copy(m);
 	Oplane = ones(nx,ny);

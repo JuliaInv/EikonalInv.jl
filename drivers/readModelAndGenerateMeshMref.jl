@@ -1,4 +1,4 @@
-function readModelAndGenerateMeshMref(readModelFolder::ASCIIString,modelFilename::ASCIIString,dim::Int64,pad::Int64,newSize::Vector,domain::Vector)
+function readModelAndGenerateMeshMref(readModelFolder::ASCIIString,modelFilename::ASCIIString,dim::Int64,pad::Int64,domain::Vector{Float64},newSize::Vector=[],velBottom::Float64=0.0,velHigh::Float64=0.0)
 ########################## m,mref are in Velocity here. ###################################
 
 if dim==2
@@ -7,18 +7,20 @@ if dim==2
 	m = m*1e-3;
 	m = m';
 	mref = copy(m);
-	mref[:,1:end-17] = getSimilarLinearModel(m[:,1:end-17]);
-	# mref = getSimilarLinearModel(m);
+	# mref[:,1:end-17] = getSimilarLinearModel(m[:,1:end-17],velBottom,velHigh);
+	mref = getSimilarLinearModel(m,velBottom,velHigh);
 else
 	# 3D SEG slowness model
 	# modelFilename = 3Dseg256256128.mat
 	file = matopen(string(readModelFolder,"/",modelFilename)); DICT = read(file); close(file);
 	m = DICT["VELs"];
 	m = m*1e-3;
-	mref = getSimilarLinearModel(m);
+	mref = copy(m);
+	# mref[:,:,1:end-17] = getSimilarLinearModel(m[:,:,1:end-17],velBottom,velHigh);
+	mref = getSimilarLinearModel(m,velBottom,velHigh);
 end
 
-sea = abs(m[:] .- minimum(m)) .< 1e-2;
+sea = abs(m[:] .- minimum(m)) .< 5e-2;
 mref[sea] = m[sea];
 if newSize!=[]
 	m    = expandModelNearest(m,   collect(size(m)),newSize);
@@ -30,7 +32,6 @@ Minv = getRegularMesh(domain,collect(size(m))-1);
 
 (mPadded,MinvPadded) = addAbsorbingLayer(m,Minv,pad);
 (mrefPadded,MinvPadded) = addAbsorbingLayer(mref,Minv,pad);
-
 
 
 N = prod(MinvPadded.n+1);

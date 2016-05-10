@@ -28,7 +28,7 @@ if plotting
 			ylabel("Depth (km)")
 		end
 		if filename != ""
-			title(filename[1:end-4],fontsize = 11);
+			# title(filename[1:end-4],fontsize = 11);
 			savefig(string(filename[1:end-4],".png"));
 		end
 	elseif length(size(m))==3
@@ -43,7 +43,7 @@ if plotting
 			imshow(pic,clim = limits); title(string("frame",lin[k]));colorbar()
 		end
 		if filename != ""
-			title(filename[1:end-4],fontsize = 11);
+			# title(filename[1:end-4],fontsize = 11);
 			savefig(string(filename[1:end-4],".png"));
 		end
 	end
