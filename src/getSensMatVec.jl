@@ -26,7 +26,17 @@ function getSensMatVec(v::Vector,m::Vector,pFor::EikonalInvParam)
 	pEiks = pFor.eikonalParams;
     for i=1:nsrc
 		pEik_i = pEiks[i];
+		if useFilesForFields
+			file = matopen(getFieldsFileName());
+			pEik_i.T1 		= read(file,string("T1_",i));
+			pEik_i.ordering = read(file,string("ordering_",i));
+			pEik_i.OP 		= read(file,string("OP_",i));
+			close(file);
+		end
 		getSensMatVecEik(v,Tlin,pEik_i);
+		if useFilesForFields
+			FactoredEikonalFastMarching.clear!(pEik_i);
+		end
 		Jv[:,i] = P'*Tlin;
     end
     return vec(Jv)

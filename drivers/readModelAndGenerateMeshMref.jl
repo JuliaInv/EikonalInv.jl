@@ -7,8 +7,8 @@ if dim==2
 	m = m*1e-3;
 	m = m';
 	mref = copy(m);
-	# mref[:,1:end-17] = getSimilarLinearModel(m[:,1:end-17],velBottom,velHigh);
-	mref = getSimilarLinearModel(m,velBottom,velHigh);
+	mref[:,1:end-17] = getSimilarLinearModel(m[:,1:end-17],velBottom,velHigh);
+	# mref = getSimilarLinearModel(m,velBottom,velHigh);
 else
 	# 3D SEG slowness model
 	# modelFilename = 3Dseg256256128.mat
@@ -16,11 +16,11 @@ else
 	m = DICT["VELs"];
 	m = m*1e-3;
 	mref = copy(m);
-	# mref[:,:,1:end-17] = getSimilarLinearModel(m[:,:,1:end-17],velBottom,velHigh);
-	mref = getSimilarLinearModel(m,velBottom,velHigh);
+	mref[:,:,1:end-17] = getSimilarLinearModel(m[:,:,1:end-17],velBottom,velHigh);
+	# mref = getSimilarLinearModel(m,velBottom,velHigh);
 end
 
-sea = abs(m[:] .- minimum(m)) .< 5e-2;
+sea = abs(m[:] .- minimum(m)) .< 7e-2;
 mref[sea] = m[sea];
 if newSize!=[]
 	m    = expandModelNearest(m,   collect(size(m)),newSize);

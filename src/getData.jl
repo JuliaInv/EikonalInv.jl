@@ -14,6 +14,12 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
     D  = zeros(nrec,nsrc)
     pEik = Array(EikonalParam,nsrc);
     
+	
+	if useFilesForFields
+		tfilename = getFieldsFileName();
+		tfile = matopen(tfilename, "w");
+	end
+	
 	pMem = getEikonalTempMemory(n_nodes);
 	ntup = tuple(n_nodes...);
 	T = zeros(Float64,ntup) # V is a temporary array of Float64. 
@@ -40,7 +46,15 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 		D[:,k] = P'*T[:];
 		if doClear
 			FactoredEikonalFastMarching.clear!(pEik[k]);
+		elseif useFilesForFields
+			write(tfile,string("T1_",k),pEik[k].T1);
+			write(tfile,string("ordering_",k),pEik[k].ordering);
+			write(tfile,string("OP_",k),pEik[k].OP);
+			FactoredEikonalFastMarching.clear!(pEik[k]);
 		end
+	end
+	if useFilesForFields
+		close(tfile);
 	end
 	pFor.eikonalParams = pEik;
     return D,pFor

@@ -3,6 +3,7 @@ module EikonalInv
 using jInv.Mesh
 using jInv.Utils
 using FactoredEikonalFastMarching
+using MAT
 
 
 import jInv.ForwardShare.getData
@@ -13,6 +14,13 @@ import jInv.ForwardShare.ForwardProbType
 
 export EikonalInvParam
 export getEikonalInvParam
+
+useFilesForFields = false;
+
+function getFieldsFileName()
+	tfilename = string("tempEikFields_worker",myid(),".mat");
+end
+
 
 type EikonalInvParam <: ForwardProbType
 	Mesh      		:: RegularMesh  

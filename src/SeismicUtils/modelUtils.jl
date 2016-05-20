@@ -26,6 +26,19 @@ ds = spdiagm(2.0*v[:]);
 return s,ds
 end
 
+
+
+function slowToSlowSquaredLeveled(v::Array)
+s = v.^2;
+ds = spdiagm(2.0*v[:]);
+return s,ds
+end
+
+
+
+
+
+
 function expandModelNearest(m,n,ntarget)
 if length(size(m))==2
 	mnew = zeros(Float64,ntarget[1],ntarget[2]);
