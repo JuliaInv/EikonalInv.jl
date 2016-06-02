@@ -1,4 +1,4 @@
-function prepareTravelTimeDataFiles(m,Minv::RegularMesh,mref,boundsHigh,boundsLow,filenamePrefix::ASCIIString,pad::Int64,jump::Int64,offset::Int64)
+function prepareTravelTimeDataFiles(m,Minv::RegularMesh,mref,boundsHigh,boundsLow,filenamePrefix::ASCIIString,pad::Int64,jump::Int64,offset::Int64,useFilesForFields::Bool = false)
 ### Here we generate data files for sources and receivers. This can be replaced with real sources/receivers files.
 ########################## m is in Velocity here. ###################################
 
@@ -9,7 +9,7 @@ writeSrcRcvLocFile(RCVfile,Minv,pad,1);
 
 dataFullFilename = string(filenamePrefix,"_travelTime");
 HO = false;
-prepareTravelTimeDataFiles(m, Minv, filenamePrefix,dataFullFilename,offset,HO);
+prepareTravelTimeDataFiles(m, Minv, filenamePrefix,dataFullFilename,offset,HO,useFilesForFields);
 
 
 file = matopen(string(filenamePrefix,"_PARAM.mat"), "w");
@@ -23,7 +23,7 @@ close(file);
 return;
 end
 
-function prepareTravelTimeDataFiles(m, Minv::RegularMesh, filenamePrefix::ASCIIString,dataFullFilename::ASCIIString, offset::Int64,HO::Bool)
+function prepareTravelTimeDataFiles(m, Minv::RegularMesh, filenamePrefix::ASCIIString,dataFullFilename::ASCIIString, offset::Int64,HO::Bool,useFilesForFields::Bool = false)
 
 ########################## m is in Velocity here. ###################################
 
@@ -39,7 +39,7 @@ P = generateSrcRcvProjOperators(Minv.n+1,rcvNodeMap);
 # compute observed data
 
 println("~~~~~~~ Getting data Eikonal: ~~~~~~~");
-(pForEIK,contDivEIK,SourcesSubIndEIK) = getEikonalInvParam(Minv,Q,P,HO,nworkers());
+(pForEIK,contDivEIK,SourcesSubIndEIK) = getEikonalInvParam(Minv,Q,P,HO,nworkers(),useFilesForFields);
 
 (D,pForEIK) = getData(velocityToSlowSquared(m[:])[1],pForEIK,ones(length(pForEIK)),true);
 
@@ -51,8 +51,8 @@ end
 Dobs = arrangeRemoteCallDataIntoLocalData(Dobs);
 
 # D should be of length 1 becasue constMUSTBeOne = 1;
-Dobs += 0.01*mean(abs(Dobs))*randn(size(Dobs,1),size(Dobs,2));
-Wd = (1.0./(abs(Dobs)+ 0.2*mean(abs(Dobs))));
+# Dobs += 0.001*mean(abs(Dobs))*randn(size(Dobs,1),size(Dobs,2));
+Wd = (1.0./(abs(Dobs)+ 0.1*mean(abs(Dobs))));
 Wd = limitDataToOffset(Wd,srcNodeMap,rcvNodeMap,offset);
 writeDataFile(string(dataFullFilename,".dat"),Dobs,Wd,srcNodeMap,rcvNodeMap);
 

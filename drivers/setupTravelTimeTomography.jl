@@ -1,4 +1,4 @@
-function setupTravelTimeTomography(m,filenamePrefix::ASCIIString, resultsOutputFolderAndPrefix::ASCIIString)
+function setupTravelTimeTomography(m,filenamePrefix::ASCIIString, resultsOutputFolderAndPrefix::ASCIIString,useFilesForFields::Bool = false)
 
 blas_set_num_threads(nworkers());
 
@@ -66,7 +66,7 @@ mref = Iact'*mref[:];
 
 EikMPIWorkers = nworkers(); # this just set the maximal MPI workers. To activate parallelism, run addprocs()
 
-(pFor,contDiv,SourcesSubInd) = getEikonalInvParam(Minv,Q,P,HO,EikMPIWorkers);
+(pFor,contDiv,SourcesSubInd) = getEikonalInvParam(Minv,Q,P,HO,EikMPIWorkers,useFilesForFields);
 
 
 misfun = SSDFun
