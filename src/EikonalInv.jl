@@ -1,5 +1,5 @@
 module EikonalInv
-	
+
 using jInv.Mesh
 using jInv.Utils
 using FactoredEikonalFastMarching
@@ -15,19 +15,18 @@ import jInv.ForwardShare.ForwardProbType
 export EikonalInvParam
 export getEikonalInvParam
 
-useFilesForFields = false;
-
 function getFieldsFileName()
 	tfilename = string("tempEikFields_worker",myid(),".mat");
 end
 
 
 type EikonalInvParam <: ForwardProbType
-	Mesh      		:: RegularMesh  
-    Sources			:: SparseMatrixCSC  
-    Receivers		:: SparseMatrixCSC
-	HO        		:: Bool 
-	eikonalParams	:: Array{EikonalParam}
+	Mesh      		  :: RegularMesh  
+    Sources			  :: SparseMatrixCSC  
+    Receivers		  :: SparseMatrixCSC
+	HO        		  :: Bool 
+	eikonalParams	  :: Array{EikonalParam}
+	useFilesForFields :: Bool
 end
 
 
@@ -50,13 +49,13 @@ end
 
 
 
-function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool=false)
+function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool=false,useFilesForFields::Bool = false)
 	## This function does not use the parallel mechanism of jInv.
-	return EikonalInvParam(Mesh,Sources,Receivers,HO,Array(EikonalParam,0));
+	return EikonalInvParam(Mesh,Sources,Receivers,HO,Array(EikonalParam,0),useFilesForFields);
 end
 
 
-function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool,numWorkers::Int64)
+function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool,numWorkers::Int64,useFilesForFields::Bool = false)
 	## This function does use the parallel mechanism of jInv (i.e., returns a RemoteRef), even if numWorkers=1.						
 	if numWorkers > nworkers()
 		numWorkers = nworkers();
@@ -84,7 +83,7 @@ function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers
 					I_p = getSourcesIndicesOfKthWorker(numWorkers,idx,nsrc);
 					SourcesSubInd[idx] = I_p;
 					# find src and rec on mesh
-					pFor[idx]  = remotecall(p,getEikonalInvParam, Mesh, Sources[:,I_p], Receivers, HO);
+					pFor[idx]  = remotecall(p,getEikonalInvParam, Mesh, Sources[:,I_p], Receivers, HO,useFilesForFields);
 					wait(pFor[idx])
 				end
 			end

@@ -20,7 +20,7 @@ function getSensTMatVec(v::Vector,m::Vector,pFor::EikonalInvParam)
 	
     for i=1:nsrc
 		t = P*v[(i-1)*nrec + 1 : i*nrec];
-		if useFilesForFields
+		if pFor.useFilesForFields
 			file = matopen(getFieldsFileName());
 			pEiks[i].T1 		= read(file,string("T1_",i));
 			pEiks[i].ordering = read(file,string("ordering_",i));
@@ -28,7 +28,7 @@ function getSensTMatVec(v::Vector,m::Vector,pFor::EikonalInvParam)
 			close(file);
 		end
 		getSensTMatVecEik(t,JTvi,pEiks[i]);
-		if useFilesForFields
+		if pFor.useFilesForFields
 			FactoredEikonalFastMarching.clear!(pEiks[i]);
 		end
         JTv += JTvi;

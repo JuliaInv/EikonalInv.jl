@@ -15,7 +15,7 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
     pEik = Array(EikonalParam,nsrc);
     
 	
-	if useFilesForFields
+	if pFor.useFilesForFields
 		tfilename = getFieldsFileName();
 		tfile = matopen(tfilename, "w");
 	end
@@ -46,14 +46,14 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 		D[:,k] = P'*T[:];
 		if doClear
 			FactoredEikonalFastMarching.clear!(pEik[k]);
-		elseif useFilesForFields
+		elseif pFor.useFilesForFields
 			write(tfile,string("T1_",k),pEik[k].T1);
 			write(tfile,string("ordering_",k),pEik[k].ordering);
 			write(tfile,string("OP_",k),pEik[k].OP);
 			FactoredEikonalFastMarching.clear!(pEik[k]);
 		end
 	end
-	if useFilesForFields
+	if pFor.useFilesForFields
 		close(tfile);
 	end
 	pFor.eikonalParams = pEik;

@@ -1,5 +1,35 @@
-export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer,cutAbsorbingLayer,velocityToSlowSquared,slowSquaredToVelocity,velocityToSlow,slowToSlowSquared
+export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer,cutAbsorbingLayer
+export velocityToSlowSquared,slowSquaredToVelocity,velocityToSlow,slowToSlowSquared,slowSquaredToSlow
+export slowToLeveledSlowSquared,getModelInvNewton
 
+function slowToLeveledSlowSquared(s,mid::Float64 = 0.32,a::Float64 = 0.0,b::Float64 = 0.05)
+d = (b-a)./2.0;
+dinv = 500;
+tt = dinv.*(mid-s);
+t = -d.*(tanh(tt)+1) + a;
+dt = (dinv*d)*(sech(tt)).^2 + 1;
+# up until here it's just the slowness
+dt = spdiagm(2*(t+s).*dt);
+t = (t + s).^2;
+return t,dt
+end
+
+
+function getModelInvNewton(m,modFun::Function,m0 = copy(m))
+# m0: initial guess for the model inverse
+# modFun: the model function to invert.
+s = m0;
+for k=1:20
+    k
+    (fs,dfs) = modFun(s);
+    println(vecnorm(fs - m,Inf))
+    if vecnorm(fs - m,Inf) < 1e-5
+        break;
+    end
+    s = s - dfs\(fs - m);
+end
+return s;
+end
 
 function velocityToSlowSquared(v::Array)
 s = (1./(v+1e-16)).^2
@@ -26,17 +56,11 @@ ds = spdiagm(2.0*v[:]);
 return s,ds
 end
 
-
-
-function slowToSlowSquaredLeveled(v::Array)
-s = v.^2;
-ds = spdiagm(2.0*v[:]);
+function slowSquaredToSlow(v::Array)
+s = sqrt(v);
+ds = spdiagm(0.5./s[:]);
 return s,ds
 end
-
-
-
-
 
 
 function expandModelNearest(m,n,ntarget)
