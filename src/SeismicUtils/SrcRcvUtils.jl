@@ -98,9 +98,9 @@ n_tup = tuple((Msh.n+1)...); # n_tup is nodes...
 Q = zeros(n_tup);
 
 if Msh.dim==2
-	Q[pad+1:jump:end-pad-1,1] = 1.0
+	Q[pad+1:jump:end-pad,1] = 1.0
 else	
-	Q[pad+1:jump:end-pad-1,pad+1:jump:end-pad-1,1] = 1.0;
+	Q[pad+1:jump:end-pad,pad+1:jump:end-pad,1] = 1.0;
 end
 numSrcRcv = round(Int,sum(Q));
 Q = find(Q);
@@ -136,7 +136,7 @@ if eltype(D)==Float64
 		end
 	end
 else
-	println("Writing ``complex'' data file");  
+	println("Writing ``complex'' data file");
 	Data = zeros(Float32,countnz(Wd),6);
 	k = 1;
 	for j = 1:size(D,2) 
