@@ -4,7 +4,7 @@ export slowToLeveledSlowSquared,getModelInvNewton
 
 function slowToLeveledSlowSquared(s,mid::Float64 = 0.32,a::Float64 = 0.0,b::Float64 = 0.05)
 d = (b-a)./2.0;
-dinv = 500;
+dinv = 200;
 tt = dinv.*(mid-s);
 t = -d.*(tanh(tt)+1) + a;
 dt = (dinv*d)*(sech(tt)).^2 + 1;
@@ -18,15 +18,20 @@ end
 function getModelInvNewton(m,modFun::Function,m0 = copy(m))
 # m0: initial guess for the model inverse
 # modFun: the model function to invert.
+err_prev = Inf;
+s_prev = copy(m0);
 s = m0;
-for k=1:20
+for k=1:50
     k
     (fs,dfs) = modFun(s);
-    println(vecnorm(fs - m,Inf))
-    if vecnorm(fs - m,Inf) < 1e-5
+	err = vecnorm(fs - m,Inf);
+    println(err)
+	if err < 1e-5
         break;
     end
-    s = s - dfs\(fs - m);
+    err_prev = err;
+	s_prev[:] = s;
+	s = s - 0.4*(dfs\(fs - m));
 end
 return s;
 end
