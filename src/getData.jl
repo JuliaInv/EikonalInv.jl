@@ -24,6 +24,8 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 	ntup = tuple(n_nodes...);
 	T = zeros(Float64,ntup) # V is a temporary array of Float64. 
     T1_temp = zeros(Float32,ntup);
+	ordering_temp = zeros(FactoredEikonalFastMarching.EikIdxType,prod(n_nodes));
+	OP_temp 	  = zeros(Int8,ntup)
 	for k=1:nsrc
 		src_k_loc = Q.rowval[k];
 		if Mesh.dim==2
@@ -36,6 +38,8 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 		m = reshape(m,ntup);
 		pEik[k] = getEikonalParam(Mesh,m,src,pFor.HO);
 		pEik[k].T1 = T; # Here, we set T (of Float64) for the calculation, but reuse the memory.
+		pEik[k].ordering = ordering_temp;
+		pEik[k].OP		 = OP_temp;
 		solveFastMarchingUpwindGrad(pEik[k],pMem);
 		T1_temp[:] = T;
 		if Mesh.dim==2
@@ -52,7 +56,10 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 			write(tfile,string("OP_",k),pEik[k].OP);
 			FactoredEikonalFastMarching.clear!(pEik[k]);
 		else
+			# Only here we actually save the data.
 			pEik[k].T1 = copy(T1_temp);
+			pEik[k].ordering = copy(ordering_temp);
+			pEik[k].OP = copy(OP_temp);
 		end
 	end
 	if pFor.useFilesForFields
