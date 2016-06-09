@@ -23,7 +23,8 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 	pMem = getEikonalTempMemory(n_nodes);
 	ntup = tuple(n_nodes...);
 	T = zeros(Float64,ntup) # V is a temporary array of Float64. 
-    for k=1:nsrc
+    T1_temp = zeros(Float32,ntup);
+	for k=1:nsrc
 		src_k_loc = Q.rowval[k];
 		if Mesh.dim==2
 			src = zeros(Int64,2);
@@ -36,8 +37,7 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 		pEik[k] = getEikonalParam(Mesh,m,src,pFor.HO);
 		pEik[k].T1 = T; # Here, we set T (of Float64) for the calculation, but reuse the memory.
 		solveFastMarchingUpwindGrad(pEik[k],pMem);
-		pEik[k].T1 = zeros(Float32,ntup); # For the sensitivities, we don't really need a high precision T.
-		pEik[k].T1[:] = T;
+		T1_temp[:] = T;
 		if Mesh.dim==2
 			selfMultiplyWithAnalyticSolution2D(n_nodes,Mesh.h,src,T);
 		else
@@ -51,10 +51,13 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 			write(tfile,string("ordering_",k),pEik[k].ordering);
 			write(tfile,string("OP_",k),pEik[k].OP);
 			FactoredEikonalFastMarching.clear!(pEik[k]);
+		else
+			pEik[k].T1 = copy(T1_temp);
 		end
 	end
 	if pFor.useFilesForFields
 		close(tfile);
+		gc()
 	end
 	pFor.eikonalParams = pEik;
     return D,pFor

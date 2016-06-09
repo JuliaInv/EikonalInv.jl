@@ -197,7 +197,10 @@ if length(size(m))==2
 	OmegaNew = [Omega[1],Omega[2] - 2*pad*Msh.h[1],Omega[3],Omega[4]-pad*Msh.h[2]];
 	MshNew = getRegularMesh(OmegaNew,nnew);
 elseif length(size(m))==3
-	error("Not implemented")
+	mnew = m[pad+1:end-pad,pad+1:end-pad,1:end-pad];
+	nnew = collect(size(mnew))-1;
+	OmegaNew = [Omega[1],Omega[2] - 2*pad*Msh.h[1],Omega[3],Omega[4]-2*pad*Msh.h[2],Omega[4],Omega[5]-pad*Msh.h[3]];
+	MshNew = getRegularMesh(OmegaNew,nnew);
 end
 
 return mnew,MshNew;
