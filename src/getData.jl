@@ -51,7 +51,7 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
 		if doClear
 			FactoredEikonalFastMarching.clear!(pEik[k]);
 		elseif pFor.useFilesForFields
-			write(tfile,string("T1_",k),pEik[k].T1);
+			write(tfile,string("T1_",k),T1_temp);
 			write(tfile,string("ordering_",k),pEik[k].ordering);
 			write(tfile,string("OP_",k),pEik[k].OP);
 			FactoredEikonalFastMarching.clear!(pEik[k]);
