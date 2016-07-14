@@ -111,9 +111,6 @@ if length(size(m))==2
 	end
 	m_vel = ones(nx)*linspace(mtop,mbottom,nz)';
 	mref = m_vel;
-	
-
-
 elseif length(size(m))==3
 	(nx,ny,nz) = size(m);
 	m_vel = copy(m);
