@@ -2,6 +2,12 @@ if nworkers()<=1
 	println("Make code faster by adding processes: addprocs(X)")
 end
 
+
+#############################################################################################################
+# This example reproduce the 2D example in the paper 
+# Eran Treister and Eldad Haber, "A fast marching algorithm for the factored eikonal equation". Under review. 2016.
+#############################################################################################################
+
 using  jInv.Mesh
 using  jInv.Utils
 using  jInv.InverseSolve
@@ -9,7 +15,7 @@ using  EikonalInv
 using  MAT
 
 #############################################################################################################
-plotting = false;
+plotting = true;
 if plotting
 	using  PyPlot
 	close("all");
@@ -20,8 +26,8 @@ resultsDir = pwd();
 
 ###############################################################################################################
 # this filename can be used to save the model during the iterations. If set to "", no images or files will be saved.
-resultsFilenamePrefix = "";
-# resultsFilenamePrefix = string(resultsDir,"/travelTimeInvSEG"); 
+# resultsFilenamePrefix = "";
+resultsFilenamePrefix = string(resultsDir,"/travelTimeInvSEG"); 
 ################################################################################################################
 
 
@@ -38,12 +44,12 @@ dim     = 2;
 pad     = 0;
 jump    = 5;
 offset  = 256;
-(m,Minv,mref,boundsHigh,boundsLow) = readModelAndGenerateMeshMref(modelDir,"SEGmodel2Dsalt.dat",dim,pad,[0.0,13.5,0.0,4.2],[256,128]);
+(m,Minv,mref,boundsHigh,boundsLow) = readModelAndGenerateMeshMref(modelDir,"SEGmodel2Dsalt.dat",dim,pad,[0.0,13.5,0.0,4.2],[256,128],1.752,2.7);
 dataFilenamePrefix = string(dataDir,"/DATA_SEG",tuple((Minv.n+1)...));
 
-
+limits = (minimum(m),maximum(m));
+	
 if plotting
-	limits = (minimum(m),maximum(m));
 	figure()
 	plotModel(m,true,true,Minv,pad,limits);
 	figure()
@@ -52,19 +58,15 @@ end
 
 prepareTravelTimeDataFiles(m,Minv,mref,boundsHigh,boundsLow,dataFilenamePrefix,pad,jump,offset);
 
-(Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,sback,mref,boundsHigh,boundsLow,resultsFilename) = setupTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix);
+(Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,sback,mref,boundsHigh,boundsLow,resultsFilename,Dobs) = setupTravelTimeTomography(m,dataFilenamePrefix, resultsFilenamePrefix);
 
 ########################################################################################################
 ##### Set up Inversion #################################################################################
 ########################################################################################################
-
-maxStep=0.1*maximum(boundsHigh);
-modfun = velocityToSlowSquared;
-a = minimum(boundsLow);
-b = maximum(boundsHigh);
-
+############### Inversion for the velocity:
+# modfun = velocityToSlowSquared;
 ################################################################################################################
-############### USE A BOUND MODEL ##############################################################################
+############### USE A BOUND MODEL For velocity #################################################################
 ################################################################################################################
 # maxStep=0.1*maximum(boundsHigh);
 # a = minimum(boundsLow);
@@ -77,7 +79,30 @@ b = maximum(boundsHigh);
 # end
 # mref = getBoundModelInv(mref,a,b);
 # boundsHigh = boundsHigh*10000000.0;
-# boundsLow = -boundsLow*100000000.0
+# boundsLow = -boundsLow*100000000.0;
+################################################################################################################
+################ Inversion for the squared slowness: ###########################################################
+################################################################################################################
+
+mref 		= velocityToSlowSquared(mref)[1];
+t    		= copy(boundsLow*0.9);
+boundsLow 	= velocityToSlowSquared(boundsHigh*1.1)[1];
+boundsHigh 	= velocityToSlowSquared(t)[1]; t = 0;
+###################################################
+a = minimum(boundsLow);
+b = maximum(boundsHigh);
+maxStep=0.1*maximum(boundsHigh);
+
+
+############### Standard bounded optimization:
+# modfun 		= identityMod;
+
+############### USE A BOUND MODEL For slow squared #############################################################
+
+modfun(m) = getBoundModel(m,a,b);
+mref = getBoundModelInv(mref,a,b);
+boundsHigh = boundsHigh*10000000.0;
+boundsLow = -boundsLow*100000000.0
 
 
 ################################################################################################################
@@ -86,19 +111,19 @@ b = maximum(boundsHigh);
 
 
 cgit  = 8;
-maxit = 7;
-alpha = 1e-1;
+maxit = 10;
+alpha = 5e-1;
 pcgTol = 1e-1;
 
-HesPrec=getSSORCGRegularizationPreconditioner(1.0,1e-5,1000)
+HesPrec=getSSORCGRegularizationPreconditioner(1.0,1e-5,100)
 
 ################################################# GIT VERSION OF JINV #################################################
 
 regparams = [1.0,1.0,1.0,1e-6];
 #### Use smoothness regularization 
-# regfun(m, mref, M) = wdiffusionRegNodal(m, mref, M, Iact=Iact, C = regparams);
+regfun(m, mref, M) = wdiffusionRegNodal(m, mref, M, Iact=Iact, C = regparams);
 #### Use TV regularization 
-regfun(m, mref, M) = wTVRegNodal(m, mref, M, Iact=Iact, C = regparams);
+# regfun(m, mref, M) = wTVRegNodal(m, mref, M, Iact=Iact, C = regparams);
 	
 	
 function dump(mc,Dc,iter,pInv,pMis)
@@ -111,7 +136,8 @@ function dump(mc,Dc,iter,pInv,pMis)
 		if plotting
 			close(888);
 			figure(888);
-			plotModel(fullMc,true,false,[],0,[a,b],splitdir(Temp)[2]);
+			# plotModel(fullMc,true,false,[],0,limits,splitdir(Temp)[2]); # no information on axes
+			plotModel(fullMc,true,true,Minv,pad,limits,splitdir(Temp)[2]); # with domain information on axes
 		end
 	end
 end	
@@ -119,16 +145,61 @@ end
 pInv = getInverseParam(Minv,modfun,regfun,alpha,mref[:],boundsLow,boundsHigh,
                      maxStep=maxStep,pcgMaxIter=cgit,pcgTol=pcgTol,
 					 minUpdate=1e-3, maxIter = maxit,HesPrec=HesPrec);
+
+D0RFs, = computeMisfit(pInv.modelfun(mref[:])[1],pMisRFs,false);
+					 
 #### Projected Gauss Newton
-mc,Dc,flag = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
+mc,Dc,flag,his = projGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
 #### Barrier Gauss Newton
-# mc,Dc,flag = barrierGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump,epsilon = 0.1);
+# mc,Dc,flag,his = barrierGNCG(copy(mref[:]),pInv,pMisRFs,indCredit = [],dumpResults = dump);
+
+
+if plotting
+	figure()
+	Fvals = his.F;
+	Jvals = his.Jc;
+	numiter = length(Fvals);
+	semilogy(0:numiter-1,Fvals,"-*");
+	xlabel("Gauss Newton iterations")
+	ylabel("Misfit value")
+end
+
+D0 = Array(Array{Float64,2},length(pMisRFs))
+for k = 1:length(pMisRFs)
+	D0[k] = fetch(D0RFs[k]);
+end
+D0 = arrangeRemoteCallDataIntoLocalData(D0); D0RFs = 0;
+
+
 
 Dpred = Array(Array{Float64,2},length(pMisRFs))
 for k = 1:length(pMisRFs)
 	Dpred[k] = fetch(Dc[k]);
 end
-Dpred = arrangeRemoteCallDataIntoLocalData(Dpred);
+Dpred = arrangeRemoteCallDataIntoLocalData(Dpred); Dc = 0;
+
+if plotting
+	figure()
+	imshow(Dpred');
+	colorbar();
+	xlabel("Sources")
+	ylabel("Receivers")
+	figure()
+	imshow(D0');
+	colorbar();
+	xlabel("Sources")
+	ylabel("Receivers")
+	figure()
+	imshow(abs(Dpred - Dobs)');
+	colorbar();
+	xlabel("Sources")
+	ylabel("Receivers")
+	figure()
+	imshow(abs(D0 - Dobs)');
+	colorbar();
+	xlabel("Sources")
+	ylabel("Receivers")
+end
 
 if resultsFilename!=""
 	Temp = splitext(resultsFilename);

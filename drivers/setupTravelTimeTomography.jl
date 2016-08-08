@@ -79,11 +79,11 @@ for i=1:length(pFor)
 	dobs[i] = DobsEik[:,I_i];
 end
 WdEik = 0;
-DobsEik = 0;
+# DobsEik = 0;
 
 pMisRFs = getMisfitParam(pFor, Wd, dobs, misfun, Iact,sback);
 
-return (Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,sback,mref,boundsHigh,boundsLow,resultsFilename);
+return (Q,P,pMisRFs,SourcesSubInd,contDiv,Iact,sback,mref,boundsHigh,boundsLow,resultsFilename,DobsEik);
 end
 
 
