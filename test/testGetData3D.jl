@@ -32,9 +32,9 @@ dlo, = getData(vec(m0),pFor)
 @test norm(dho-dlo)/norm(dho) < 0.05
 
 # generate mesh to mesh interpolation
-M2M = Array{RemoteRef{Channel{Any}}}(4);
+M2M = Array{Future}(4);
 for k=1:4
-	M2M[k] = remotecall(workers()[k],speye,prod(n+1))
+	M2M[k] = remotecall(speye,workers()[k],prod(n+1))
 end
 # parallelize over sources
 pForp,continuationDivision,SourcesSubInd = getEikonalInvParam(M,Q,R,true,4)

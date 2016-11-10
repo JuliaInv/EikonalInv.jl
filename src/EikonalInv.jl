@@ -67,7 +67,7 @@ function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers
 	end		
 	continuationDivision = [1;numWorkers+1];
 	
-	pFor   = Array(RemoteRef{Channel{Any}},numWorkers)
+	pFor   = Array{RemoteChannel}(numWorkers)
 	i = 1; nextidx() = (idx=i; i+=1; idx)
 
 	nsrc  = size(Sources,2);
@@ -83,7 +83,7 @@ function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers
 					I_p = getSourcesIndicesOfKthWorker(numWorkers,idx,nsrc);
 					SourcesSubInd[idx] = I_p;
 					# find src and rec on mesh
-					pFor[idx]  = remotecall(p,getEikonalInvParam, Mesh, Sources[:,I_p], Receivers, HO,useFilesForFields);
+					pFor[idx]  = initRemoteChannel(getEikonalInvParam,p, Mesh, Sources[:,I_p], Receivers, HO,useFilesForFields);
 					wait(pFor[idx])
 				end
 			end
