@@ -1,6 +1,5 @@
-function setupTravelTimeTomography(m,filenamePrefix::ASCIIString, resultsOutputFolderAndPrefix::ASCIIString,useFilesForFields::Bool = false)
+function setupTravelTimeTomography(m,filenamePrefix::String, resultsOutputFolderAndPrefix::String,useFilesForFields::Bool = false)
 
-blas_set_num_threads(nworkers());
 
 file = matopen(string(filenamePrefix,"_PARAM.mat"));
 n_cells = read(file,"MinvN");

@@ -56,7 +56,7 @@ end
 
 
 function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool,numWorkers::Int64,useFilesForFields::Bool = false)
-	## This function does use the parallel mechanism of jInv (i.e., returns a RemoteRef), even if numWorkers=1.						
+	## This function does use the parallel mechanism of jInv (i.e., returns a RemoteChannel), even if numWorkers=1.						
 	if numWorkers > nworkers()
 		numWorkers = nworkers();
 	end
