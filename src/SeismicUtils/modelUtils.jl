@@ -142,10 +142,9 @@ if pad<=0
 end
 mnew = zeros(size(m,1)+2*pad,size(m,2)+pad);
 mnew[pad+1:end-pad,1:end-pad] = m;
-mnew[1:pad,1:end-pad] = repmat(m[1,:],pad,1);
-mnew[end-pad+1:end,1:end-pad] = repmat(m[end,:],pad,1);
+mnew[1:pad,1:end-pad] = repmat(m[[1],:],pad,1);
+mnew[end-pad+1:end,1:end-pad] = repmat(m[[end],:],pad,1);
 mnew[:,end-pad+1:end] = repmat(mnew[:,end-pad],1,pad);
-
 return mnew;
 end
 
