@@ -9,7 +9,7 @@ using MAT
 import jInv.ForwardShare.getData
 import jInv.ForwardShare.getSensTMatVec
 import jInv.ForwardShare.getSensMatVec
-	
+
 import jInv.ForwardShare.ForwardProbType
 
 export EikonalInvParam
@@ -19,36 +19,49 @@ function getFieldsFileName()
 	tfilename = string("tempEikFields_worker",myid(),".mat");
 end
 
+"""
+type EikonalInvParam
 
+A type to be used with jInv for solving the inverse eikonal equation (e.g., travel time tomography).
+
+Fields:
+
+	Mesh 			:: RegularMesh
+	Sources 		:: SparseMatrixCSC  		  - The matrix of point source locations of size N x num_sources
+	Receivers 		:: SparseMatrixCSC  		- The matrix of point reciever locations of size N x num_recievers
+	HO          	::Bool              		- flag for higher-order discretization
+	eikonalParams	::Array{EikonalParam}   - An array of forward problem parameters. See FactoredEikonalFastMarching for EikonalParam.
+  useFilesForFields :: Bool             - flag for writing fields to disk
+
+Constructor:
+
+	getEikonalInvParam
+"""
 type EikonalInvParam <: ForwardProbType
-	Mesh      		  :: RegularMesh  
-    Sources			  :: SparseMatrixCSC  
-    Receivers		  :: SparseMatrixCSC
-	HO        		  :: Bool 
+	Mesh      		  :: RegularMesh
+  Sources			  :: SparseMatrixCSC
+  Receivers		  :: SparseMatrixCSC
+	HO        		  :: Bool
 	eikonalParams	  :: Array{EikonalParam}
 	useFilesForFields :: Bool
 end
 
+import jInv.ForwardShare.getSensMatSize
+getSensMatSize(pFor::EikonalInvParam) = (size(pFor.Receivers,2)*size(pFor.Sources,2),prod(pFor.Mesh.n+1))
 
 """
-	type EikonalInvParam
-	
-	A type to be used with jInv for solving the inverse eikonal equation (e.g., travel time tomography).
-	
-	Fields:
-	
-	Mesh 			:: RegularMesh
-	Sources 		:: SparseMatrixCSC  		- The matrix of point source locations of size N x num_sources
-	Receivers 		:: SparseMatrixCSC  		- The matrix of point reciever locations of size N x num_recievers
-	HO          	::Bool              		- flag for higher-order discretization
-	eikonalParams	::Array{EikonalParam}       - An array of forward problem parameters. See FactoredEikonalFastMarching for EikonalParam.
+function EikonalInv.getEikonalInvParam
 
-    Constructor: getEikonalInvParam
+Constructor for EikonalInvParam
+
+Input:
+
+	Mesh::RegularMesh
+	Sources::SparseMatrixCSC      - The matrix of point source locations of size N x num_sources
+	Receivers::SparseMatrixCSC    - The matrix of point reciever locations of size N x num_recievers
+	HO::Bool=false							  - flag for higher-order discretization
+	useFilesForFields::Bool=false - flag for writing fields to disk
 """
-
-
-
-
 function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool=false,useFilesForFields::Bool = false)
 	## This function does not use the parallel mechanism of jInv.
 	return EikonalInvParam(Mesh,Sources,Receivers,HO,Array(EikonalParam,0),useFilesForFields);
@@ -56,7 +69,7 @@ end
 
 
 function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool,numWorkers::Int64,useFilesForFields::Bool = false)
-	## This function does use the parallel mechanism of jInv (i.e., returns a RemoteChannel), even if numWorkers=1.						
+	## This function does use the parallel mechanism of jInv (i.e., returns a RemoteChannel), even if numWorkers=1.
 	if numWorkers > nworkers()
 		numWorkers = nworkers();
 	end
@@ -64,9 +77,9 @@ function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers
 	ActualWorkers = workers();
 	if numWorkers < nworkers()
 		ActualWorkers = ActualWorkers[1:numWorkers];
-	end		
+	end
 	continuationDivision = [1;numWorkers+1];
-	
+
 	pFor   = Array{RemoteChannel}(numWorkers)
 	i = 1; nextidx() = (idx=i; i+=1; idx)
 
