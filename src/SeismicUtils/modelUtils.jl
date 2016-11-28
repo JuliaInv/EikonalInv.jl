@@ -1,4 +1,4 @@
-export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer,cutAbsorbingLayer
+export expandModelNearest, getSimilarLinearModel, addAbsorbingLayer
 export velocityToSlowSquared,slowSquaredToVelocity,velocityToSlow,slowToSlowSquared,slowSquaredToSlow
 export slowToLeveledSlowSquared,getModelInvNewton
 
@@ -176,27 +176,6 @@ elseif length(size(m))==3
 		mnew[:,:,end-pad+k] = t;
 	end
 	MshNew = getRegularMesh([Omega[1],Omega[2] + 2*pad*Msh.h[1],Omega[3],Omega[4] + 2*pad*Msh.h[2],Omega[5],Omega[6]+pad*Msh.h[2]],collect(size(mnew))-1);
-end
-
-return mnew,MshNew;
-end
-
-
-function cutAbsorbingLayer(m::Array{Float64},Msh,pad::Int64)
-if pad<=0
-	return m,Msh;
-end
-Omega = Msh.domain;
-if length(size(m))==2
-	mnew = m[pad+1:end-pad,1:end-pad];
-	nnew = collect(size(mnew))-1;
-	OmegaNew = [Omega[1],Omega[2] - 2*pad*Msh.h[1],Omega[3],Omega[4]-pad*Msh.h[2]];
-	MshNew = getRegularMesh(OmegaNew,nnew);
-elseif length(size(m))==3
-	mnew = m[pad+1:end-pad,pad+1:end-pad,1:end-pad];
-	nnew = collect(size(mnew))-1;
-	OmegaNew = [Omega[1],Omega[2] - 2*pad*Msh.h[1],Omega[3],Omega[4]-2*pad*Msh.h[2],Omega[4],Omega[5]-pad*Msh.h[3]];
-	MshNew = getRegularMesh(OmegaNew,nnew);
 end
 
 return mnew,MshNew;
