@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/JuliaInv/EikonalInv.jl.svg?branch=master)](https://travis-ci.org/JuliaInv/EikonalInv.jl) [![Coverage Status](https://coveralls.io/repos/github/JuliaInv/EikonalInv.jl/badge.png?branch=master)](https://coveralls.io/github/JuliaInv/EikonalInv.jl?branch=master)
+[![Build Status](https://travis-ci.org/JuliaInv/EikonalInv.jl.png?branch=master)](https://travis-ci.org/JuliaInv/EikonalInv.jl) [![Coverage Status](https://coveralls.io/repos/github/JuliaInv/EikonalInv.jl/badge.png?branch=master)](https://coveralls.io/github/JuliaInv/EikonalInv.jl?branch=master)
 
 # EikonalInv.jl
 A Julia package for solving the inverse eikonal equation on a regular rectangular mesh.
