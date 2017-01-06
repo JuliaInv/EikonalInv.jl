@@ -1,18 +1,10 @@
-if nworkers()<=1
-	println("Make code faster by adding processes: addprocs(X)")
-end
 
-
-#############################################################################################################
-# This example reproduce the 2D example in the paper 
-# Eran Treister and Eldad Haber, "A fast marching algorithm for the factored eikonal equation". Under review. 2016.
-#############################################################################################################
-
-using  jInv.Mesh
-using  jInv.Utils
-using  jInv.InverseSolve
-using  EikonalInv
-using  MAT
+using jInv.Mesh
+using jInv.Utils
+using jInv.InverseSolve
+using jInv.Vis
+using EikonalInv
+using MAT
 
 #############################################################################################################
 plotting = true;
@@ -27,13 +19,12 @@ resultsDir = pwd();
 ###############################################################################################################
 # this filename can be used to save the model during the iterations. If set to "", no images or files will be saved.
 # resultsFilenamePrefix = "";
-resultsFilenamePrefix = string(resultsDir,"/travelTimeInvSEG"); 
+resultsFilenamePrefix = string(resultsDir,"/shortTravelTimeInvSEG"); 
 ################################################################################################################
 
 
 modelDir = pwd();
 include("../drivers/prepareTravelTimeDataFiles.jl");
-include("../drivers/plotModel.jl");
 include("../drivers/readModelAndGenerateMeshMref.jl");
 include("../drivers/setupTravelTimeTomography.jl");
 
@@ -43,17 +34,18 @@ include("../drivers/setupTravelTimeTomography.jl");
 dim     = 2;
 pad     = 0;
 jump    = 5;
-offset  = 256;
-(m,Minv,mref,boundsHigh,boundsLow) = readModelAndGenerateMeshMref(modelDir,"SEGmodel2Dsalt.dat",dim,pad,[0.0,13.5,0.0,4.2],[256,128],1.752,2.7);
-dataFilenamePrefix = string(dataDir,"/DATA_SEG",tuple((Minv.n+1)...));
+newSize = [256,128];
+offset  = ceil(Int64,(newSize[1]*(6/13.5)));;
+(m,Minv,mref,boundsHigh,boundsLow) = readModelAndGenerateMeshMref(modelDir,"SEGmodel2Dsalt.dat",dim,pad,[0.0,13.5,0.0,4.2],newSize,1.752,2.9);
+dataFilenamePrefix = string(dataDir,"/shortDATA_SEG",tuple((Minv.n+1)...));
 
 limits = (minimum(m),maximum(m));
 	
 if plotting
 	figure()
-	plotModel(m,true,true,Minv,pad,limits);
+	plotModel(m,true,Minv,pad,limits);
 	figure()
-	plotModel(mref,true,true,Minv,pad,limits);
+	plotModel(mref,true,Minv,pad,limits);
 end
 
 prepareTravelTimeDataFiles(m,Minv,mref,boundsHigh,boundsLow,dataFilenamePrefix,pad,jump,offset);
@@ -95,14 +87,14 @@ maxStep=0.1*maximum(boundsHigh);
 
 
 ############### Standard bounded optimization:
-# modfun 		= identityMod;
+modfun 		= identityMod;
 
 ############### USE A BOUND MODEL For slow squared #############################################################
 
-modfun(m) = getBoundModel(m,a,b);
-mref = getBoundModelInv(mref,a,b);
-boundsHigh = boundsHigh*10000000.0;
-boundsLow = -boundsLow*100000000.0
+# modfun(m) = getBoundModel(m,a,b);
+# mref = getBoundModelInv(mref,a,b);
+# boundsHigh = boundsHigh*10000000.0;
+# boundsLow = -boundsLow*100000000.0
 
 
 ################################################################################################################
@@ -136,8 +128,8 @@ function dump(mc,Dc,iter,pInv,pMis)
 		if plotting
 			close(888);
 			figure(888);
-			# plotModel(fullMc,true,false,[],0,limits,splitdir(Temp)[2]); # no information on axes
-			plotModel(fullMc,true,true,Minv,pad,limits,splitdir(Temp)[2]); # with domain information on axes
+			# plotModel(fullMc,false,[],0,limits,splitdir(Temp)[2]); # no information on axes
+			plotModel(fullMc,true,Minv,pad,limits,splitdir(Temp)[2]); # with domain information on axes
 		end
 	end
 end	
