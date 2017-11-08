@@ -44,15 +44,15 @@ println("~~~~~~~ Getting data Eikonal: ~~~~~~~");
 (D,pForEIK) = getData(velocityToSlowSquared(m[:])[1],pForEIK,ones(length(pForEIK)),true);
 
 
-Dobs = Array(Array{Float64,2},length(pForEIK))
+Dobs = Array{Array{Float64,2}}(length(pForEIK))
 for k = 1:length(pForEIK)
 	Dobs[k] = fetch(D[k]);
 end
 Dobs = arrangeRemoteCallDataIntoLocalData(Dobs);
 
 # D should be of length 1 becasue constMUSTBeOne = 1;
-Dobs += 0.01*mean(abs(Dobs))*randn(size(Dobs,1),size(Dobs,2));
-Wd = (1.0./(abs(Dobs)+ 0.1*mean(abs(Dobs))));
+Dobs += 0.01*mean(abs.(Dobs))*randn(size(Dobs,1),size(Dobs,2));
+Wd = (1.0./(abs.(Dobs)+ 0.1*mean(abs.(Dobs))));
 Wd = limitDataToOffset(Wd,srcNodeMap,rcvNodeMap,offset);
 writeDataFile(string(dataFullFilename,".dat"),Dobs,Wd,srcNodeMap,rcvNodeMap);
 

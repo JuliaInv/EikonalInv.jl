@@ -46,7 +46,7 @@ mback   = zeros(Float64,N);
 
 ## Setting the sea constant:
 mask = zeros(N);
-sea = abs(m[:] .- minimum(m)) .< 5e-2;
+sea = abs.(m[:] .- minimum(m)) .< 5e-2;
 mask[sea] = 1.0;
 # # setup active cells
 mback = vec(m[:].*mask);
@@ -70,8 +70,8 @@ EikMPIWorkers = nworkers(); # this just set the maximal MPI workers. To activate
 
 misfun = SSDFun
 
-Wd 		= Array(Array{Float64},length(pFor));
-dobs 	= Array(Array{Float64},length(pFor));
+Wd 		= Array{Array{Float64}}(length(pFor));
+dobs 	= Array{Array{Float64}}(length(pFor));
 for i=1:length(pFor)
 	I_i = SourcesSubInd[i];
 	Wd[i]   = WdEik[:,I_i];

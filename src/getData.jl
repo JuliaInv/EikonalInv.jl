@@ -12,7 +12,7 @@ function getData(m,pFor::EikonalInvParam,doClear::Bool=false)
     
     # allocate space for data and fields
     D  = zeros(nrec,nsrc)
-    pEik = Array(EikonalParam,nsrc);
+    pEik = Array{EikonalParam}(nsrc);
     
 	
 	if pFor.useFilesForFields

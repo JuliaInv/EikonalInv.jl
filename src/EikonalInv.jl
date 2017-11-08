@@ -1,4 +1,6 @@
 module EikonalInv
+export EikonalInvParam
+export getEikonalInvParam
 
 using jInv.Mesh
 using jInv.Utils
@@ -12,8 +14,7 @@ import jInv.ForwardShare.getSensMatVec
 
 import jInv.ForwardShare.ForwardProbType
 
-export EikonalInvParam
-export getEikonalInvParam
+
 
 function getFieldsFileName()
 	tfilename = string("tempEikFields_worker",myid(),".mat");
@@ -64,7 +65,7 @@ Input:
 """
 function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers::SparseMatrixCSC,HO::Bool=false,useFilesForFields::Bool = false)
 	## This function does not use the parallel mechanism of jInv.
-	return EikonalInvParam(Mesh,Sources,Receivers,HO,Array(EikonalParam,0),useFilesForFields);
+	return EikonalInvParam(Mesh,Sources,Receivers,HO,Array{EikonalParam}(0),useFilesForFields);
 end
 
 
@@ -73,7 +74,7 @@ function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers
 	if numWorkers > nworkers()
 		numWorkers = nworkers();
 	end
-	SourcesSubInd = Array(Array{Int64,1},numWorkers);
+	SourcesSubInd = Array{Array{Int64,1}}(numWorkers);
 	ActualWorkers = workers();
 	if numWorkers < nworkers()
 		ActualWorkers = ActualWorkers[1:numWorkers];

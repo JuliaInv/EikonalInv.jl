@@ -13,9 +13,9 @@ n = M.n;
 for k=1:M.dim
 	A[:,k+1] = A[:,k+1] - domainBoundaryUTM[2*k-1];
 	A[:,k+1] = A[:,k+1] ./ (domainBoundaryUTM[2*k] - domainBoundaryUTM[2*k-1]);
-	A[:,k+1] = round(A[:,k+1] .* (n[k]))+1.0;
+	A[:,k+1] = round.(A[:,k+1] .* (n[k]))+1.0;
 end
-A = round(Int,A);
+A = round.(Int,A);
 return A;
 end
 

@@ -69,10 +69,10 @@ mc,Dc,flag = projGNCG(mref[:],pInv,pMisRFs,indCredit = []);
 
 clear!(pMisRFs);
 #############################################################################################
-rm("DATA_SEG(66,33)_travelTime.dat");
-rm("DATA_SEG(66,33)_rcvMap.dat");
-rm("DATA_SEG(66,33)_srcMap.dat");
-rm("DATA_SEG(66,33)_PARAM.mat");
+rm("DATA_SEG(66, 33)_travelTime.dat");
+rm("DATA_SEG(66, 33)_rcvMap.dat");
+rm("DATA_SEG(66, 33)_srcMap.dat");
+rm("DATA_SEG(66, 33)_PARAM.mat");
 rm("jInv.out");
 
 
