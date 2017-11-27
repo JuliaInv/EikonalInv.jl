@@ -2,13 +2,14 @@
 using jInv.Mesh
 using jInv.Utils
 using jInv.InverseSolve
-using jInv.Vis
+
 using EikonalInv
 using MAT
 
 #############################################################################################################
-plotting = true;
+plotting = false;
 if plotting
+	using jInvVis
 	using  PyPlot
 	close("all");
 end
