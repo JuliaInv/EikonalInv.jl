@@ -43,7 +43,7 @@ return s,ds
 end
 
 function slowSquaredToVelocity(s::Array)
-m = 1./sqrt(s+1e-16);
+m = 1./sqrt.(s+1e-16);
 dm = spdiagm(-0.5*(1./(s[:].^(3/2))));
 return m,dm
 end
@@ -62,7 +62,7 @@ return s,ds
 end
 
 function slowSquaredToSlow(v::Array)
-s = sqrt(v);
+s = sqrt.(v);
 ds = spdiagm(0.5./s[:]);
 return s,ds
 end
