@@ -5,14 +5,13 @@ os:
   - linux
 
 julia:
-  - 0.6
   - release
   
 notifications:
   email: false
  
 before_install:
-   - julia -e 'Pkg.add("MAT"); Pkg.build("MAT");'
+   - julia -e 'Pkg.add("MAT"); Pkg.build("MAT");Pkg.build("HDF5")'
    - julia -e 'Pkg.clone("https://github.com/JuliaInv/jInv.jl","jInv"); Pkg.build("jInv");'
    - julia -e 'Pkg.clone("https://github.com/JuliaInv/FactoredEikonalFastMarching.jl","FactoredEikonalFastMarching"); Pkg.build("FactoredEikonalFastMarching");'
    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
