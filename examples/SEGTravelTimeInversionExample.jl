@@ -7,7 +7,7 @@ using EikonalInv
 using MAT
 
 #############################################################################################################
-plotting = false;
+plotting = true;
 if plotting
 	using jInvVis
 	using  PyPlot
