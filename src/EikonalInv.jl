@@ -87,7 +87,7 @@ function getEikonalInvParam(Mesh::RegularMesh,Sources::SparseMatrixCSC,Receivers
 	nsrc  = size(Sources,2);
 	# send out jobs
 	@sync begin
-		for p=workers()
+		for p = ActualWorkers
 			@async begin
 				while true
 					idx = nextidx()
