@@ -1,8 +1,11 @@
 [![Build Status](https://travis-ci.org/JuliaInv/EikonalInv.jl.png?branch=master)](https://travis-ci.org/JuliaInv/EikonalInv.jl) [![Coverage Status](https://coveralls.io/repos/github/JuliaInv/EikonalInv.jl/badge.png?branch=master)](https://coveralls.io/github/JuliaInv/EikonalInv.jl?branch=master)
 
+An updated version of the package is now under [`jInvSeismic`](https://github.com/JuliaInv/jInvSeismic.jl). 
+
 # EikonalInv.jl
 A Julia package for solving the inverse eikonal equation on a regular rectangular mesh.
 For forward modelling and sensitivities it uses the fast marching algorithm for the factored eikonal equation.
+
 
 Based on the following paper (please cite if you are using the package):
 
